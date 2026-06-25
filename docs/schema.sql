@@ -1,0 +1,41 @@
+CREATE TABLE equity_query_record (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  query_id VARCHAR(64) NOT NULL UNIQUE,
+  person_name VARCHAR(100) NOT NULL,
+  phone_number VARCHAR(30),
+  id_number VARCHAR(30),
+  company_name VARCHAR(255),
+  credit_code VARCHAR(64),
+  matched_company_name VARCHAR(255),
+  matched_credit_code VARCHAR(64),
+  status VARCHAR(50) NOT NULL,
+  confidence VARCHAR(50),
+  result_json JSON,
+  data_source VARCHAR(100),
+  operator_id VARCHAR(64),
+  query_reason VARCHAR(255),
+  created_at DATETIME NOT NULL,
+  INDEX idx_equity_query_record_created_at (created_at),
+  INDEX idx_equity_query_record_person_company (person_name, matched_credit_code)
+);
+
+CREATE TABLE equity_data_snapshot (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  query_id VARCHAR(64) NOT NULL,
+  company_name VARCHAR(255),
+  credit_code VARCHAR(64),
+  shareholder_name VARCHAR(255),
+  shareholder_type VARCHAR(50),
+  subscribed_amount DECIMAL(20, 4),
+  subscribed_ratio DECIMAL(10, 6),
+  paid_in_amount DECIMAL(20, 4),
+  paid_in_ratio DECIMAL(10, 6),
+  listed_holding_amount DECIMAL(20, 4),
+  listed_holding_ratio DECIMAL(10, 6),
+  source VARCHAR(100),
+  source_updated_at DATETIME,
+  raw_data JSON,
+  created_at DATETIME NOT NULL,
+  INDEX idx_equity_data_snapshot_query_id (query_id),
+  INDEX idx_equity_data_snapshot_company_holder (credit_code, shareholder_name)
+);

@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>股权查询系统</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      color: #1f2937;
+      background: #eef1f6;
+    }
+
+    main {
+      width: min(1100px, calc(100vw - 32px));
+      margin: 40px auto;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+      border-bottom: 2px solid #d9e2ef;
+    }
+
+    .tab {
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #6b7280;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      margin-bottom: -2px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .tab:hover { color: #2563eb; background: #f0f4ff; }
+
+    .tab.active {
+      color: #2563eb;
+      background: #fff;
+      border-color: #d9e2ef;
+      border-bottom-color: #fff;
+    }
+
+    .panel, .panel2 {
+      background: #ffffff;
+      border: 1px solid #d9e2ef;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 10px 28px rgba(31, 41, 55, 0.08);
+    }
+
+    .panel2 { display: none; }
+    .panel2.visible { display: block; }
+
+    .notice {
+      margin-bottom: 16px;
+      border: 1px solid #f59e0b;
+      border-radius: 8px;
+      padding: 12px 14px;
+      color: #92400e;
+      font-size: 14px;
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .notice.info {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      color: #1e40af;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    input {
+      width: 100%;
+      height: 40px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 0 12px;
+      font-size: 14px;
+      outline: none;
+      background: #ffffff;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      height: 40px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+
+    button:hover { opacity: 0.88; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .primary {
+      color: #fff;
+      background: #2563eb;
+    }
+
+    .primary.green {
+      background: #059669;
+    }
+
+    .secondary {
+      color: #1f2937;
+      background: #e5e7eb;
+    }
+
+    .secondary.outline {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+    }
+
+    .result-area {
+      margin-top: 20px;
+    }
+
+    .result-area .summary {
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      font-size: 13px;
+    }
+
+    .result-area .summary strong {
+      color: #2563eb;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-badge.found { background: #d1fae5; color: #065f46; }
+    .status-badge.not-found { background: #fee2e2; color: #991b1b; }
+    .status-badge.error { background: #fef3c7; color: #92400e; }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    pre {
+      min-height: 120px;
+      margin: 12px 0 0;
+      padding: 16px;
+      overflow: auto;
+      border-radius: 8px;
+      background: #101827;
+      color: #d1e7ff;
+      font-size: 13px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    @media (max-width: 720px) {
+      main {
+        margin: 16px auto;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs { overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>股权查询系统</h1>
+  <div class="subtitle">基于东方财富公开数据 · 支持公司股东查询 / 自然人跨公司持股搜索</div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="company">公司查询</div>
+    <div class="tab" data-tab="person">人员持股搜索</div>
+  </div>
+
+  <section class="panel">
+    <div class="notice" id="providerNotice">加载数据源状态...</div>
+
+    <!-- ====== 公司查询 Tab ====== -->
+    <div id="tab-company" class="panel2 visible">
+      <div class="grid">
+        <div>
+          <label for="personName">股东姓名 / 机构名称</label>
+          <input id="personName" value="香港中央结算有限公司" placeholder="输入要查的股东名称">
+        </div>
+        <div>
+          <label for="creditCode">股票代码</label>
+          <input id="creditCode" placeholder="例如：600519.SH">
+        </div>
+        <div>
+          <label for="companyName">公司名称</label>
+          <input id="companyName" value="贵州茅台" placeholder="输入公司名称">
+        </div>
+        <div>
+          <label for="queryReason">查询原因</label>
+          <input id="queryReason" value="尽职调查">
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="queryBtn" type="button">查询股份</button>
+        <button class="secondary" id="listedBtn" type="button">上市公司示例</button>
+        <button class="secondary" id="ambiguousBtn" type="button">公司重名示例</button>
+      </div>
+      <div class="result-area" id="result-company" style="display:none"></div>
+      <pre id="output-company" style="margin-top:20px">等待查询...</pre>
+    </div>
+
+    <!-- ====== 人员搜索 Tab ====== -->
+    <div id="tab-person" class="panel2">
+      <div class="notice info">输入人名后系统将在所有上市公司的十大股东/十大流通股东中搜索匹配记录。
+        手机号和身份证用于身份消歧（当前仅对支持的数据源有效）。</div>
+      <div class="grid">
+        <div>
+          <label for="ps-personName">人员姓名 <span style="color:#dc2626">*</span></label>
+          <input id="ps-personName" value="张三" placeholder="必填：输入要查询的人员姓名">
+        </div>
+        <div>
+          <label for="ps-phone">手机号</label>
+          <input id="ps-phone" placeholder="选填（暂仅Mock支持）">
+        </div>
+        <div>
+          <label for="ps-idNumber">身份证号</label>
+          <input id="ps-idNumber" placeholder="选填（暂仅Mock支持）">
+        </div>
+        <div>
+          <label for="ps-company">限定公司</label>
+          <input id="ps-company" placeholder="选填：限定搜索某家公司">
+        </div>
+      </div>
+      <div class="grid" style="grid-template-columns:1fr">
+        <div>
+          <label for="ps-datasource">数据源选择</label>
+          <select id="ps-datasource" style="width:100%;height:40px;border:1px solid #cbd5e1;border-radius:6px;padding:0 12px;font-size:14px;background:#fff;outline:none">
+            <option value="auto">东方财富（默认）</option>
+            <option value="qichacha">企查查（需配置API密钥）</option>
+            <option value="all">全部数据源合并</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary green" id="ps-searchBtn" type="button">搜索持股</button>
+      </div>
+      <div class="result-area" id="result-person" style="display:none"></div>
+      <pre id="output-person" style="margin-top:20px">输入人名后点击"搜索持股"...</pre>
+    </div>
+
+    <div class="actions" style="margin-top:24px; border-top:1px solid #e2e8f0; padding-top:16px">
+      <button class="secondary outline" id="recordsBtn" type="button">查询记录</button>
+    </div>
+  </section>
+</main>
+
+<script>
+  const output = document.getElementById("output");
+  const providerNotice = document.getElementById("providerNotice");
+
+  function show(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = JSON.stringify(value, null, 2);
+  }
+
+  function showResultArea(id, html) {
+    const area = document.getElementById(id);
+    if (area) { area.innerHTML = html; area.style.display = 'block'; }
+  }
+
+  function hideResultArea(id) {
+    const area = document.getElementById(id);
+    if (area) area.style.display = 'none';
+  }
+
+  function renderHoldingsTable(holdings) {
+    if (!holdings || holdings.length === 0) {
+      return '<div class="empty-state">暂无持股记录</div>';
+    }
+    const rows = holdings.map((h, i) => {
+      const ratio = h.holdingRatio != null ? (h.holdingRatio * 100).toFixed(4) + '%' : '-';
+      const amount = h.holdingAmount != null ? h.holdingAmount.toLocaleString() + ' 股' : '-';
+      const date = h.sourceUpdatedAt || '-';
+      return `<tr>
+        <td>${h.companyName || '-'}</td>
+        <td>${h.creditCode || '-'}</td>
+        <td>${h.shareholderType || '-'}</td>
+        <td>${amount}</td>
+        <td>${ratio}</td>
+        <td>${date}</td>
+        <td>${h.dataSource || '-'}</td>
+      </tr>`;
+    }).join('');
+    return `<table>
+      <thead><tr>
+        <th>公司名称</th><th>股票代码</th><th>股东类型</th>
+        <th>持股数量</th><th>持股比例</th><th>报告期</th><th>数据来源</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div style="margin-top:8px;font-size:12px;color:#6b7280">共 ${holdings.length} 条记录</div>`;
+  }
+
+  function renderStatusBadge(status) {
+    const map = { 'FOUND': 'found', 'NOT_FOUND': 'not-found', 'DATA_SOURCE_ERROR': 'error', 'INVALID_REQUEST': 'error' };
+    return `<span class="status-badge ${map[status] || ''}">${status}</span>`;
+  }
+
+  function getPayload() {
+    return {
+      personName: document.getElementById('personName').value.trim(),
+      creditCode: document.getElementById('creditCode').value.trim() || null,
+      companyName: document.getElementById('companyName').value.trim() || null,
+      operatorId: "web-demo",
+      queryReason: document.getElementById('queryReason').value.trim()
+    };
+  }
+
+  function getPersonPayload() {
+    return {
+      personName: document.getElementById('ps-personName').value.trim(),
+      phoneNumber: document.getElementById('ps-phone').value.trim() || null,
+      idNumber: document.getElementById('ps-idNumber').value.trim() || null,
+      companyName: document.getElementById('ps-company').value.trim() || null,
+      operatorId: "web-demo",
+      queryReason: "自然人持股搜索",
+      dataSource: document.getElementById('ps-datasource').value
+    };
+  }
+
+  async function postQuery(payload) {
+    const outputEl = document.getElementById('output-company');
+    outputEl.textContent = '查询中...';
+    hideResultArea('result-company');
+    const response = await fetch('/api/equity/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    outputEl.textContent = JSON.stringify(data, null, 2);
+    if (data.holdings && data.holdings.length > 0) {
+      const rows = data.holdings.map(h => `<tr>
+        <td>${h.shareholderName || '-'}</td>
+        <td>${h.shareholderType || '-'}</td>
+        <td>${h.listedHoldingAmount != null ? Number(h.listedHoldingAmount).toLocaleString() + ' 股' : '-'}</td>
+        <td>${h.listedHoldingRatio != null ? (h.listedHoldingRatio * 100).toFixed(4) + '%' : '-'}</td>
+        <td>${h.sourceUpdatedAt || '-'}</td>
+        <td>${h.source || '-'}</td>
+      </tr>`).join('');
+      showResultArea('result-company', `<div class="summary">
+        状态: ${renderStatusBadge(data.status)} &nbsp; 匹配到 ${data.holdings.length} 条持股记录
+      </div>
+      <table><thead><tr>
+        <th>股东名称</th><th>股东类型</th><th>持股数量</th><th>持股比例</th><th>报告期</th><th>来源</th>
+      </tr></thead><tbody>${rows}</tbody></table>`);
+    } else if (data.status === 'COMPANY_AMBIGUOUS' && data.companyCandidates) {
+      const items = data.companyCandidates.map(c => `<div style="padding:4px 0">${c.companyName} (${c.stockCode || c.creditCode})</div>`).join('');
+      showResultArea('result-company', `<div class="summary">${renderStatusBadge(data.status)} 匹配到多个公司，请指定股票代码：${items}</div>`);
+    } else {
+      showResultArea('result-company', `<div class="summary">${renderStatusBadge(data.status)} ${data.message || ''}</div>`);
+    }
+  }
+
+  async function postPersonSearch(payload) {
+    const outputEl = document.getElementById('output-person');
+    outputEl.textContent = '搜索中...';
+    hideResultArea('result-person');
+    const response = await fetch('/api/equity/person-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    outputEl.textContent = JSON.stringify(data, null, 2);
+    if (data.holdings && data.holdings.length > 0) {
+      showResultArea('result-person', `<div class="summary">
+        状态: ${renderStatusBadge(data.status)} &nbsp; 共找到 <strong>${data.holdings.length}</strong> 条持股记录
+      </div>
+      ${renderHoldingsTable(data.holdings)}`);
+    } else {
+      showResultArea('result-person', `<div class="summary">
+        ${renderStatusBadge(data.status)} ${data.message || '未找到持股记录'}
+      </div>`);
+    }
+  }
+
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.panel2').forEach(p => p.classList.remove('visible'));
+      const target = document.getElementById('tab-' + tab.dataset.tab);
+      if (target) target.classList.add('visible');
+    });
+  });
+
+  // Company query (existing)
+  document.getElementById('queryBtn').addEventListener('click', () => {
+    postQuery(getPayload()).catch(error => show({ error: String(error) }));
+  });
+
+  document.getElementById('listedBtn').addEventListener('click', () => {
+    document.getElementById('personName').value = '香港中央结算有限公司';
+    document.getElementById('creditCode').value = '600519.SH';
+    document.getElementById('companyName').value = '';
+    postQuery(getPayload()).catch(error => show({ error: String(error) }));
+  });
+
+  document.getElementById('ambiguousBtn').addEventListener('click', () => {
+    document.getElementById('personName').value = '香港中央结算有限公司';
+    document.getElementById('creditCode').value = '';
+    document.getElementById('companyName').value = '平安';
+    postQuery(getPayload()).catch(error => show({ error: String(error) }));
+  });
+
+  // Person search (new)
+  document.getElementById('ps-searchBtn').addEventListener('click', () => {
+    const name = document.getElementById('ps-personName').value.trim();
+    if (!name) {
+      document.getElementById('output-person').textContent = '请输入人员姓名';
+      return;
+    }
+    postPersonSearch(getPersonPayload()).catch(error => show('output-person', { error: String(error) }));
+  });
+
+  // Enter key support
+  ['ps-personName', 'ps-phone', 'ps-idNumber', 'ps-company', 'ps-datasource'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('ps-searchBtn').click();
+    });
+  });
+
+  // Query records
+  document.getElementById('recordsBtn').addEventListener('click', async () => {
+    const activeTab = document.querySelector('.tab.active');
+    const outputId = activeTab && activeTab.dataset.tab === 'person' ? 'output-person' : 'output-company';
+    const el = document.getElementById(outputId);
+    el.textContent = '加载中...';
+    try {
+      const response = await fetch('/api/equity/records?size=10');
+      const data = await response.json();
+      el.textContent = JSON.stringify(data, null, 2);
+    } catch (error) {
+      el.textContent = JSON.stringify({ error: String(error) }, null, 2);
+    }
+  });
+
+  fetch('/api/equity/provider')
+    .then(response => response.json())
+    .then(data => {
+      providerNotice.textContent = `数据源：${data.providerName}。${data.message}`;
+      providerNotice.className = data.realData ? 'notice' : 'notice';
+    })
+    .catch(error => {
+      providerNotice.textContent = `数据源状态读取失败：${String(error)}`;
+    });
+</script>
+</body>
+</html>
