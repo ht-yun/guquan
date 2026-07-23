@@ -5,16 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.guquan</groupId>
-    <artifactId>equity-query</artifactId>
+    <artifactId>company-profile-query</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>equity-query</name>
-    <description>Reusable equity holding query module</description>
+    <name>company-profile-query</name>
+    <description>Company and organization profile query service</description>
 
     <properties>
         <java.version>17</java.version>
         <spring-boot.version>3.3.6</spring-boot.version>
+        <apache-poi.version>5.5.1</apache-poi.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <dependencyManagement>
@@ -49,6 +52,16 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>1.49.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${apache-poi.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -62,7 +75,13 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>com.guquan.equity.EquityQueryApplication</mainClass>
+                    <mainClass>com.guquan.equity.CompanyProfileQueryApplication</mainClass>
+                    <requiresUnpack>
+                        <dependency>
+                            <groupId>com.microsoft.playwright</groupId>
+                            <artifactId>driver-bundle</artifactId>
+                        </dependency>
+                    </requiresUnpack>
                 </configuration>
                 <executions>
                     <execution>
@@ -77,8 +96,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <release>${java.version}</release>
                     <parameters>true</parameters>
                     <annotationProcessorPaths>
                         <path>

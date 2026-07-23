@@ -1,14 +1,14 @@
 spring:
   application:
-    name: equity-query
+    name: company-profile-query
   datasource:
-    url: jdbc:h2:mem:equity_query;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:file:./data/company_profile;MODE=MySQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
   h2:
     console:
-      enabled: true
+      enabled: false
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,16 +16,27 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
 
 server:
+  address: 127.0.0.1
   port: 8080
   error:
     include-message: always
-    include-stacktrace: always
 
-# 企查查数据源配置（可选）
-# 申请地址：https://open.qichacha.com/
-qichacha:
-  enabled: false
-  app-key:
-  app-secret:
+company-browser:
+  enabled: true
+  headless: false
+  timeout-millis: 15000
+  max-task-seconds: 180
+  user-data-dir: .browser-data/company-profile
+  screenshot-dir: .screenshots/company-profile
+
+employment-jobs:
+  storage-dir: data/employment-jobs
+  retention-days: 30
+  max-file-size-bytes: 20971520
+  max-employment-rows: 10000

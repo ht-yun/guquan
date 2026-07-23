@@ -1,544 +1,520 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>股权查询系统</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <title>就业单位信息批量补全</title>
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: -apple-system, "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-      color: #1f2937;
-      background: #eef1f6;
-    }
-
-    main {
-      width: min(1100px, calc(100vw - 32px));
-      margin: 40px auto;
-    }
-
-    h1 {
-      margin: 0 0 8px;
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: 0;
-    }
-
-    .subtitle {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 20px;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 0;
-      margin-bottom: 0;
-      border-bottom: 2px solid #d9e2ef;
-    }
-
-    .tab {
-      padding: 10px 22px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #6b7280;
-      cursor: pointer;
-      border: 1px solid transparent;
-      border-bottom: none;
-      border-radius: 8px 8px 0 0;
-      margin-bottom: -2px;
-      transition: color 0.15s, background 0.15s;
-    }
-
-    .tab:hover { color: #2563eb; background: #f0f4ff; }
-
-    .tab.active {
-      color: #2563eb;
-      background: #fff;
-      border-color: #d9e2ef;
-      border-bottom-color: #fff;
-    }
-
-    .panel, .panel2 {
-      background: #ffffff;
-      border: 1px solid #d9e2ef;
-      border-radius: 8px;
-      padding: 24px;
-      box-shadow: 0 10px 28px rgba(31, 41, 55, 0.08);
-    }
-
-    .panel2 { display: none; }
-    .panel2.visible { display: block; }
-
-    .notice {
-      margin-bottom: 16px;
-      border: 1px solid #f59e0b;
-      border-radius: 8px;
-      padding: 12px 14px;
-      color: #92400e;
-      font-size: 14px;
-      line-height: 1.5;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .notice.info {
-      border-color: #3b82f6;
-      background: #eff6ff;
-      color: #1e40af;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 16px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #374151;
-    }
-
-    input {
-      width: 100%;
-      height: 40px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 0 12px;
-      font-size: 14px;
-      outline: none;
-      background: #ffffff;
-    }
-
-    input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
-    }
-
-    .actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    button {
-      height: 40px;
-      border: 0;
-      border-radius: 6px;
-      padding: 0 16px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: opacity 0.15s;
-    }
-
-    button:hover { opacity: 0.88; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .primary {
-      color: #fff;
-      background: #2563eb;
-    }
-
-    .primary.green {
-      background: #059669;
-    }
-
-    .secondary {
-      color: #1f2937;
-      background: #e5e7eb;
-    }
-
-    .secondary.outline {
-      background: transparent;
-      border: 1px solid #cbd5e1;
-    }
-
-    .result-area {
-      margin-top: 20px;
-    }
-
-    .result-area .summary {
-      margin-bottom: 12px;
-      padding: 10px 14px;
-      border-radius: 6px;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      font-size: 13px;
-    }
-
-    .result-area .summary strong {
-      color: #2563eb;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 8px 10px;
-      border-bottom: 1px solid #e2e8f0;
-    }
-
-    th {
-      background: #f8fafc;
-      font-weight: 600;
-      color: #475569;
-      white-space: nowrap;
-    }
-
-    tr:hover td {
-      background: #f8fafc;
-    }
-
-    .status-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .status-badge.found { background: #d1fae5; color: #065f46; }
-    .status-badge.not-found { background: #fee2e2; color: #991b1b; }
-    .status-badge.error { background: #fef3c7; color: #92400e; }
-
-    .empty-state {
-      text-align: center;
-      padding: 32px 16px;
-      color: #9ca3af;
-      font-size: 14px;
-    }
-
-    pre {
-      min-height: 120px;
-      margin: 12px 0 0;
-      padding: 16px;
-      overflow: auto;
-      border-radius: 8px;
-      background: #101827;
-      color: #d1e7ff;
-      font-size: 13px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    @media (max-width: 720px) {
-      main {
-        margin: 16px auto;
-      }
-
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .tabs { overflow-x: auto; }
-    }
+    :root { --blue:#155eef; --ink:#172033; --muted:#667085; --line:#d9e1ec; --soft:#f6f8fb; --green:#15803d; --orange:#b54708; --red:#b42318; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:#f3f6fa; color:var(--ink); font:14px/1.55 "Microsoft YaHei", Arial, sans-serif; }
+    main { max-width:1240px; margin:0 auto; padding:28px 18px 60px; }
+    h1 { margin:0 0 6px; font-size:28px; }
+    h2 { margin:0 0 12px; font-size:20px; }
+    h3 { margin:0 0 10px; }
+    p { margin:6px 0 12px; }
+    .muted { color:var(--muted); }
+    .panel { background:white; border:1px solid var(--line); border-radius:12px; padding:20px; margin:18px 0; box-shadow:0 2px 10px rgba(23,32,51,.04); }
+    .primary { border-top:4px solid var(--blue); }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .grid.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .upload { display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:14px; background:var(--soft); border:1px dashed #a9b8cc; border-radius:8px; }
+    label { display:block; margin-bottom:5px; font-weight:600; }
+    input, select, textarea { width:100%; padding:9px 10px; border:1px solid #b8c4d4; border-radius:6px; background:white; color:var(--ink); }
+    input[type=file] { width:auto; max-width:100%; }
+    input[type=checkbox] { width:auto; margin-right:6px; }
+    textarea { min-height:150px; resize:vertical; }
+    button, .button { display:inline-block; padding:9px 15px; border:0; border-radius:6px; background:var(--blue); color:white; cursor:pointer; text-decoration:none; font-weight:600; }
+    button:hover, .button:hover { filter:brightness(.94); }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    button.secondary { background:#64748b; }
+    button.success { background:var(--green); }
+    button.danger { background:var(--red); }
+    button.small { padding:6px 10px; font-size:12px; }
+    .actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .cards { display:grid; grid-template-columns:repeat(6,minmax(100px,1fr)); gap:10px; margin:15px 0; }
+    .card { background:var(--soft); border:1px solid var(--line); border-radius:8px; padding:12px; }
+    .card strong { display:block; font-size:23px; margin-top:3px; }
+    .status { display:inline-block; padding:3px 8px; border-radius:999px; font-size:12px; font-weight:700; background:#eef2f7; }
+    .status.RESOLVED { color:var(--green); background:#eaf8ef; }
+    .status.NEEDS_COLLECTION { color:#175cd3; background:#eff8ff; }
+    .status.NEEDS_REVIEW, .status.CONFLICT { color:var(--orange); background:#fff4e5; }
+    .errorbox { color:var(--red); background:#fff1f0; border:1px solid #f3b5b0; border-radius:7px; padding:10px 12px; margin:10px 0; }
+    .notice { color:#175cd3; background:#eff8ff; border:1px solid #b2ddff; border-radius:7px; padding:10px 12px; margin:10px 0; }
+    .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:8px; }
+    table { width:100%; border-collapse:collapse; min-width:860px; }
+    th, td { padding:9px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { background:#f1f5f9; position:sticky; top:0; z-index:1; }
+    tr:last-child td { border-bottom:0; }
+    tr.selected { background:#eff6ff; }
+    pre { white-space:pre-wrap; background:var(--soft); padding:12px; overflow:auto; border-radius:7px; }
+    details > summary { cursor:pointer; font-weight:700; font-size:17px; }
+    .hidden { display:none !important; }
+    .candidate { border:1px solid var(--line); padding:10px; border-radius:7px; margin:8px 0; }
+    .conflict { background:#fff8eb; border:1px solid #fedf89; border-radius:7px; padding:10px; margin:8px 0; }
+    @media (max-width:850px) { .cards{grid-template-columns:repeat(2,1fr)} .grid,.grid.three{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
 <main>
-  <h1>股权查询系统</h1>
-  <div class="subtitle">基于东方财富公开数据 · 支持公司股东查询 / 自然人跨公司持股搜索</div>
+  <h1>就业单位信息批量补全</h1>
+  <p class="muted">上传已填写考生号、姓名、毕业去向和单位名称的就业模板；系统按单位去重，一家单位只查询和确认一次。</p>
 
-  <div class="tabs">
-    <div class="tab active" data-tab="company">公司查询</div>
-    <div class="tab" data-tab="person">人员持股搜索</div>
-  </div>
-
-  <section class="panel">
-    <div class="notice" id="providerNotice">加载数据源状态...</div>
-
-    <!-- ====== 公司查询 Tab ====== -->
-    <div id="tab-company" class="panel2 visible">
-      <div class="grid">
-        <div>
-          <label for="personName">股东姓名 / 机构名称</label>
-          <input id="personName" value="香港中央结算有限公司" placeholder="输入要查的股东名称">
-        </div>
-        <div>
-          <label for="creditCode">股票代码</label>
-          <input id="creditCode" placeholder="例如：600519.SH">
-        </div>
-        <div>
-          <label for="companyName">公司名称</label>
-          <input id="companyName" value="贵州茅台" placeholder="输入公司名称">
-        </div>
-        <div>
-          <label for="queryReason">查询原因</label>
-          <input id="queryReason" value="尽职调查">
-        </div>
-      </div>
-      <div class="actions">
-        <button class="primary" id="queryBtn" type="button">查询股份</button>
-        <button class="secondary" id="listedBtn" type="button">上市公司示例</button>
-        <button class="secondary" id="ambiguousBtn" type="button">公司重名示例</button>
-      </div>
-      <div class="result-area" id="result-company" style="display:none"></div>
-      <pre id="output-company" style="margin-top:20px">等待查询...</pre>
+  <section class="panel primary">
+    <h2>一、上传就业数据模板</h2>
+    <div class="upload">
+      <input id="employmentFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <button id="employmentUploadButton" onclick="uploadEmploymentWorkbook()">上传并分析</button>
+      <span id="employmentUploadStatus" class="muted">目前只支持本项目对应的 .xlsx 模板，原文件不会被修改。</span>
     </div>
 
-    <!-- ====== 人员搜索 Tab ====== -->
-    <div id="tab-person" class="panel2">
-      <div class="notice info">输入人名后系统将在所有上市公司的十大股东/十大流通股东中搜索匹配记录。
-        手机号和身份证用于身份消歧（当前仅对支持的数据源有效）。</div>
-      <div class="grid">
-        <div>
-          <label for="ps-personName">人员姓名 <span style="color:#dc2626">*</span></label>
-          <input id="ps-personName" value="张三" placeholder="必填：输入要查询的人员姓名">
-        </div>
-        <div>
-          <label for="ps-phone">手机号</label>
-          <input id="ps-phone" placeholder="选填（暂仅Mock支持）">
-        </div>
-        <div>
-          <label for="ps-idNumber">身份证号</label>
-          <input id="ps-idNumber" placeholder="选填（暂仅Mock支持）">
-        </div>
-        <div>
-          <label for="ps-company">限定公司</label>
-          <input id="ps-company" placeholder="选填：限定搜索某家公司">
-        </div>
-      </div>
-      <div class="grid" style="grid-template-columns:1fr">
-        <div>
-          <label for="ps-datasource">数据源选择</label>
-          <select id="ps-datasource" style="width:100%;height:40px;border:1px solid #cbd5e1;border-radius:6px;padding:0 12px;font-size:14px;background:#fff;outline:none">
-            <option value="auto">东方财富（默认）</option>
-            <option value="qichacha">企查查（需配置API密钥）</option>
-            <option value="all">全部数据源合并</option>
-          </select>
-        </div>
-      </div>
+    <div id="employmentWorkspace" class="hidden">
+      <div id="employmentCards" class="cards"></div>
+      <div id="employmentErrors"></div>
       <div class="actions">
-        <button class="primary green" id="ps-searchBtn" type="button">搜索持股</button>
+        <button class="secondary" onclick="refreshEmploymentJob()">刷新任务</button>
+        <button class="secondary" onclick="downloadEmployment('draft')">导出检查版</button>
+        <button class="success" id="finalExportButton" onclick="downloadEmployment('final')">导出最终版</button>
+        <button class="danger" onclick="deleteEmploymentJob()">删除任务及本地文件</button>
       </div>
-      <div class="result-area" id="result-person" style="display:none"></div>
-      <pre id="output-person" style="margin-top:20px">输入人名后点击"搜索持股"...</pre>
-    </div>
-
-    <div class="actions" style="margin-top:24px; border-top:1px solid #e2e8f0; padding-top:16px">
-      <button class="secondary outline" id="recordsBtn" type="button">查询记录</button>
+      <p class="muted">单位队列按名称去重。缓存命中会自动补齐；“待采集”需要从公示系统复制页面文字；“待审核”和“冲突”需要人工确认。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>单位名称</th><th>状态</th><th>影响行数</th><th>信用代码</th><th>行业</th><th>单位性质</th><th>所在地</th><th>操作</th></tr></thead>
+          <tbody id="employmentCompanyRows"></tbody>
+        </table>
+      </div>
     </div>
   </section>
+
+  <section id="employmentEditor" class="panel hidden">
+    <h2>二、当前单位查询与本地档案</h2>
+    <div id="employmentEditorHeading" class="notice"></div>
+    <div id="employmentQueueStatus" class="muted"></div>
+    <div class="actions">
+      <button class="secondary" onclick="copyEmploymentCompanyName()">复制单位名称</button>
+      <button class="secondary" onclick="window.open('https://www.gsxt.gov.cn/index.html','_blank','noopener')">打开国家企业信用信息公示系统</button>
+      <button class="secondary" onclick="openNextEmploymentTask()">暂不处理，下一家</button>
+    </div>
+    <label for="employmentPageText">官网结果页或详情页文字</label>
+    <textarea id="employmentPageText" placeholder="在普通 Edge/Chrome 中完成验证，打开正确企业页面，复制页面文字后粘贴到这里"></textarea>
+    <div class="actions"><button onclick="parseEmploymentPage()">解析页面文字</button></div>
+    <div id="employmentCandidates"></div>
+
+    <div id="employmentConfirmForm" class="hidden">
+      <h3>核对并确认</h3>
+      <div class="grid three">
+        <div><label for="employmentOfficialName">工商登记全称</label><input id="employmentOfficialName"></div>
+        <div><label for="employmentCreditCode">统一社会信用代码</label><input id="employmentCreditCode" maxlength="18"></div>
+        <div><label for="employmentRawIndustry">官网行业原文</label><input id="employmentRawIndustry"></div>
+        <div><label for="employmentRawType">官网企业类型原文</label><input id="employmentRawType"></div>
+        <div><label for="employmentIndustry">模板单位行业</label><select id="employmentIndustry"></select></div>
+        <div><label for="employmentNature">模板单位性质</label><select id="employmentNature"></select></div>
+        <div><label for="employmentAreaCode">注册地址行政区划代码</label><input id="employmentAreaCode" list="employmentAreaOptions" maxlength="6" oninput="searchEmploymentAreas()"><datalist id="employmentAreaOptions"></datalist></div>
+        <div><label>单位所在地</label><input id="employmentAreaName" readonly></div>
+        <div><label for="employmentAddress">注册地址</label><input id="employmentAddress"></div>
+      </div>
+      <p><label><input id="employmentReplaceName" type="checkbox">导出时将模板中的单位名称替换为工商登记全称</label></p>
+      <div id="employmentConflicts"></div>
+      <div class="actions"><button class="success" onclick="confirmEmploymentCompany(true)">补齐并确认，应用到全部关联行</button></div>
+    </div>
+  </section>
+
+  <details class="panel" open>
+    <summary>单单位查询与本地档案</summary>
+    <div id="localProfileBatchNotice" class="notice hidden"></div>
+    <p class="muted">批量流程以普通浏览器复制粘贴为主；这里保留单单位查询、手工保存和浏览器辅助功能。</p>
+    <div class="grid">
+      <div><label for="name">公司/单位名称</label><input id="name" placeholder="例如：华为技术有限公司"></div>
+      <div><label for="code">统一社会信用代码（可选）</label><input id="code"></div>
+    </div>
+    <div class="actions"><button onclick="lookup()">查询本地档案</button></div>
+
+    <h3>导入官网页面内容</h3>
+    <div><label for="importText">官网页面文字</label><textarea id="importText"></textarea></div>
+    <div class="actions"><button onclick="previewImport()">解析并预览</button><button id="saveImportButton" class="secondary" onclick="saveImport()" disabled>确认保存</button></div>
+    <div id="importStatus"></div><div id="importPreview"></div>
+
+    <h3>手工保存单位档案</h3>
+    <div class="grid">
+      <div><label for="industry">官网行业原文</label><input id="industry"></div>
+      <div><label for="entityType">官网企业类型原文</label><input id="entityType"></div>
+      <div><label for="areaCode">注册地址行政区划代码</label><input id="areaCode"></div>
+      <div><label for="address">注册地址</label><input id="address"></div>
+    </div>
+    <div class="actions"><button onclick="saveProfile()">保存到本地缓存</button><button class="secondary" onclick="parseCode()">校验信用代码</button></div>
+    <div id="result">等待操作...</div><pre id="raw"></pre>
+  </details>
+
+  <details class="panel">
+    <summary>实验性自动浏览器辅助</summary>
+    <p>该功能可能受到官网 403/521、验证码和访问频率限制，不影响批量复制粘贴流程。</p>
+    <div class="grid">
+      <div><label for="browserName">中国企业名称</label><input id="browserName"></div>
+      <div><label for="browserCode">统一社会信用代码（可选）</label><input id="browserCode"></div>
+    </div>
+    <div class="actions"><button onclick="startBrowserLookup()">开始网页查询</button><button class="secondary" onclick="continueBrowserLookup()">继续解析</button><button class="secondary" onclick="pollBrowserLookup()">刷新状态</button><button id="saveBrowserButton" class="secondary" onclick="saveBrowserCandidates()" disabled>保存结果</button></div>
+    <div id="browserStatus">尚未创建任务</div><pre id="browserResult"></pre>
+  </details>
 </main>
 
 <script>
-  const output = document.getElementById("output");
-  const providerNotice = document.getElementById("providerNotice");
+  const $ = id => document.getElementById(id);
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const statusText = {NEEDS_COLLECTION:'待采集',NEEDS_REVIEW:'待审核',CONFLICT:'有冲突',RESOLVED:'已完成'};
+  const fieldText = {'单位名称':'单位名称','单位统一社会信用代码':'统一社会信用代码','单位行业':'单位行业','单位性质':'单位性质','单位所在地代码':'单位所在地代码','单位所在地':'单位所在地'};
+  let employmentJobId = null;
+  let employmentSummary = null;
+  let employmentCompanies = [];
+  let selectedEmploymentTask = null;
+  let employmentCandidates = [];
+  let selectedEmploymentCandidate = null;
+  let employmentAreaTimer = null;
+  let employmentAreaMap = {};
+  let employmentAdvanceAfterRefresh = false;
+  let importCandidates = [];
+  let browserTaskId = null;
+  let browserPollTimer = null;
 
-  function show(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = JSON.stringify(value, null, 2);
+  async function requestJson(url, options = {}) {
+    const response = await fetch(url, options);
+    const text = await response.text();
+    let data;
+    try { data = text ? JSON.parse(text) : {}; } catch (_) { data = {message:text || '服务器返回了无法识别的内容'}; }
+    if (!response.ok) throw new Error(data.message || data.error || `请求失败（HTTP ${response.status}）`);
+    return data;
   }
 
-  function showResultArea(id, html) {
-    const area = document.getElementById(id);
-    if (area) { area.innerHTML = html; area.style.display = 'block'; }
+  async function uploadEmploymentWorkbook() {
+    const file = $('employmentFile').files[0];
+    if (!file) { $('employmentUploadStatus').textContent = '请先选择 .xlsx 文件'; return; }
+    const button = $('employmentUploadButton');
+    button.disabled = true; $('employmentUploadStatus').textContent = '正在上传和分析模板...';
+    try {
+      const form = new FormData(); form.append('file', file);
+      employmentSummary = await requestJson('/api/employment-jobs', {method:'POST', body:form});
+      employmentJobId = employmentSummary.jobId;
+      $('employmentWorkspace').classList.remove('hidden');
+      $('employmentUploadStatus').textContent = `分析完成：${employmentSummary.totalRecords} 条就业记录，${employmentSummary.uniqueCompanies} 个不同单位`;
+      await refreshEmploymentJob();
+    } catch (error) { $('employmentUploadStatus').textContent = `上传失败：${error.message}`; }
+    finally { button.disabled = false; }
   }
 
-  function hideResultArea(id) {
-    const area = document.getElementById(id);
-    if (area) area.style.display = 'none';
+  async function refreshEmploymentJob() {
+    if (!employmentJobId) return;
+    try {
+      [employmentSummary, employmentCompanies] = await Promise.all([
+        requestJson(`/api/employment-jobs/${employmentJobId}`),
+        requestJson(`/api/employment-jobs/${employmentJobId}/companies`)
+      ]);
+      renderEmploymentSummary(); renderEmploymentCompanies();
+      if (employmentAdvanceAfterRefresh) {
+        employmentAdvanceAfterRefresh = false;
+        selectedEmploymentTask = null;
+        openNextEmploymentTask();
+      } else if (selectedEmploymentTask) {
+        selectedEmploymentTask = employmentCompanies.find(item => item.companyId === selectedEmploymentTask.companyId) || null;
+        if (selectedEmploymentTask) openEmploymentTask(selectedEmploymentTask.companyId);
+      } else {
+        openNextEmploymentTask();
+      }
+    } catch (error) { $('employmentErrors').innerHTML = `<div class="errorbox">刷新失败：${esc(error.message)}</div>`; }
   }
 
-  function renderHoldingsTable(holdings) {
-    if (!holdings || holdings.length === 0) {
-      return '<div class="empty-state">暂无持股记录</div>';
-    }
-    const rows = holdings.map((h, i) => {
-      const ratio = h.holdingRatio != null ? (h.holdingRatio * 100).toFixed(4) + '%' : '-';
-      const amount = h.holdingAmount != null ? h.holdingAmount.toLocaleString() + ' 股' : '-';
-      const date = h.sourceUpdatedAt || '-';
-      return `<tr>
-        <td>${h.companyName || '-'}</td>
-        <td>${h.creditCode || '-'}</td>
-        <td>${h.shareholderType || '-'}</td>
-        <td>${amount}</td>
-        <td>${ratio}</td>
-        <td>${date}</td>
-        <td>${h.dataSource || '-'}</td>
-      </tr>`;
-    }).join('');
-    return `<table>
-      <thead><tr>
-        <th>公司名称</th><th>股票代码</th><th>股东类型</th>
-        <th>持股数量</th><th>持股比例</th><th>报告期</th><th>数据来源</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div style="margin-top:8px;font-size:12px;color:#6b7280">共 ${holdings.length} 条记录</div>`;
+  function renderEmploymentSummary() {
+    const cards = [
+      ['就业记录',employmentSummary.totalRecords],['不同单位',employmentSummary.uniqueCompanies],['缓存命中',employmentSummary.cacheHits],
+      ['待采集',employmentSummary.pendingCollection],['待审核/冲突',employmentSummary.pendingReview + employmentSummary.conflicts],['已完成',employmentSummary.resolved]
+    ];
+    $('employmentCards').innerHTML = cards.map(([label,value]) => `<div class="card"><span>${label}</span><strong>${value}</strong></div>`).join('');
+    const errors = employmentSummary.validationErrors || [];
+    $('employmentErrors').innerHTML = errors.length ? `<div class="errorbox"><b>人员数据校验未通过，最终版暂不可导出：</b><br>${errors.map(esc).join('<br>')}</div>` : '';
+    $('finalExportButton').disabled = employmentSummary.status !== 'READY_TO_EXPORT' && employmentSummary.status !== 'EXPORTED';
   }
 
-  function renderStatusBadge(status) {
-    const map = { 'FOUND': 'found', 'NOT_FOUND': 'not-found', 'DATA_SOURCE_ERROR': 'error', 'INVALID_REQUEST': 'error' };
-    return `<span class="status-badge ${map[status] || ''}">${status}</span>`;
+  function renderEmploymentCompanies() {
+    $('employmentCompanyRows').innerHTML = employmentCompanies.map(task => `<tr class="${selectedEmploymentTask?.companyId === task.companyId ? 'selected' : ''}">
+      <td><b>${esc(task.inputCompanyName)}</b>${task.officialCompanyName && task.officialCompanyName !== task.inputCompanyName ? `<br><span class="muted">登记：${esc(task.officialCompanyName)}</span>` : ''}</td>
+      <td><span class="status ${task.status}">${statusText[task.status] || task.status}</span>${task.cacheHit ? '<br><span class="muted">本地缓存</span>' : ''}</td>
+      <td>${task.affectedRows}<br><span class="muted">第 ${(task.rowNumbers || []).join('、')} 行</span></td>
+      <td>${esc(task.creditCode)}</td><td>${esc(task.employmentIndustry)}</td><td>${esc(task.employmentUnitNature)}</td>
+      <td>${esc(task.registeredAddressAreaCode)} ${esc(task.registeredAddressAreaName)}</td>
+      <td><button class="small" onclick="copyEmploymentTaskName(${task.companyId})">复制名称</button> <button class="small" onclick="openEmploymentTask(${task.companyId})">${task.status === 'RESOLVED' ? '查看/修改' : '处理'}</button></td>
+    </tr>`).join('');
   }
 
-  function getPayload() {
-    return {
-      personName: document.getElementById('personName').value.trim(),
-      creditCode: document.getElementById('creditCode').value.trim() || null,
-      companyName: document.getElementById('companyName').value.trim() || null,
-      operatorId: "web-demo",
-      queryReason: document.getElementById('queryReason').value.trim()
-    };
+  function openEmploymentTask(companyId) {
+    selectedEmploymentTask = employmentCompanies.find(item => item.companyId === companyId);
+    if (!selectedEmploymentTask) return;
+    selectedEmploymentCandidate = taskAsCandidate(selectedEmploymentTask);
+    $('employmentEditor').classList.remove('hidden');
+    $('employmentEditorHeading').innerHTML = `<b>${esc(selectedEmploymentTask.inputCompanyName)}</b>，影响 ${selectedEmploymentTask.affectedRows} 行；当前状态：${statusText[selectedEmploymentTask.status] || selectedEmploymentTask.status}`;
+    renderEmploymentQueueStatus();
+    $('employmentCandidates').innerHTML = '';
+    if (selectedEmploymentTask.officialCompanyName) showEmploymentConfirmForm(selectedEmploymentCandidate);
+    else $('employmentConfirmForm').classList.add('hidden');
+    renderEmploymentCompanies();
+    syncLocalProfilePanel(selectedEmploymentCandidate);
+    $('employmentEditor').scrollIntoView({behavior:'smooth', block:'start'});
   }
 
-  function getPersonPayload() {
-    return {
-      personName: document.getElementById('ps-personName').value.trim(),
-      phoneNumber: document.getElementById('ps-phone').value.trim() || null,
-      idNumber: document.getElementById('ps-idNumber').value.trim() || null,
-      companyName: document.getElementById('ps-company').value.trim() || null,
-      operatorId: "web-demo",
-      queryReason: "自然人持股搜索",
-      dataSource: document.getElementById('ps-datasource').value
-    };
+  function pendingEmploymentTasks() {
+    const priorities = ['NEEDS_COLLECTION', 'NEEDS_REVIEW', 'CONFLICT'];
+    return priorities.flatMap(status => employmentCompanies.filter(task => task.status === status));
   }
 
-  async function postQuery(payload) {
-    const outputEl = document.getElementById('output-company');
-    outputEl.textContent = '查询中...';
-    hideResultArea('result-company');
-    const response = await fetch('/api/equity/query', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json; charset=utf-8' },
-      body: JSON.stringify(payload)
-    });
-    const data = await response.json();
-    outputEl.textContent = JSON.stringify(data, null, 2);
-    if (data.holdings && data.holdings.length > 0) {
-      const rows = data.holdings.map(h => `<tr>
-        <td>${h.shareholderName || '-'}</td>
-        <td>${h.shareholderType || '-'}</td>
-        <td>${h.listedHoldingAmount != null ? Number(h.listedHoldingAmount).toLocaleString() + ' 股' : '-'}</td>
-        <td>${h.listedHoldingRatio != null ? (h.listedHoldingRatio * 100).toFixed(4) + '%' : '-'}</td>
-        <td>${h.sourceUpdatedAt || '-'}</td>
-        <td>${h.source || '-'}</td>
-      </tr>`).join('');
-      showResultArea('result-company', `<div class="summary">
-        状态: ${renderStatusBadge(data.status)} &nbsp; 匹配到 ${data.holdings.length} 条持股记录
-      </div>
-      <table><thead><tr>
-        <th>股东名称</th><th>股东类型</th><th>持股数量</th><th>持股比例</th><th>报告期</th><th>来源</th>
-      </tr></thead><tbody>${rows}</tbody></table>`);
-    } else if (data.status === 'COMPANY_AMBIGUOUS' && data.companyCandidates) {
-      const items = data.companyCandidates.map(c => `<div style="padding:4px 0">${c.companyName} (${c.stockCode || c.creditCode})</div>`).join('');
-      showResultArea('result-company', `<div class="summary">${renderStatusBadge(data.status)} 匹配到多个公司，请指定股票代码：${items}</div>`);
-    } else {
-      showResultArea('result-company', `<div class="summary">${renderStatusBadge(data.status)} ${data.message || ''}</div>`);
-    }
+  function renderEmploymentQueueStatus() {
+    const queue = pendingEmploymentTasks();
+    const position = queue.findIndex(task => task.companyId === selectedEmploymentTask?.companyId);
+    $('employmentQueueStatus').textContent = position >= 0
+      ? `处理队列：第 ${position + 1} / ${queue.length} 家。待采集优先，其后依次处理待审核和冲突。`
+      : '当前单位已完成；可查看信息或继续处理下一家。';
   }
 
-  async function postPersonSearch(payload) {
-    const outputEl = document.getElementById('output-person');
-    outputEl.textContent = '搜索中...';
-    hideResultArea('result-person');
-    const response = await fetch('/api/equity/person-search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json; charset=utf-8' },
-      body: JSON.stringify(payload)
-    });
-    const data = await response.json();
-    outputEl.textContent = JSON.stringify(data, null, 2);
-    if (data.holdings && data.holdings.length > 0) {
-      showResultArea('result-person', `<div class="summary">
-        状态: ${renderStatusBadge(data.status)} &nbsp; 共找到 <strong>${data.holdings.length}</strong> 条持股记录
-      </div>
-      ${renderHoldingsTable(data.holdings)}`);
-    } else {
-      showResultArea('result-person', `<div class="summary">
-        ${renderStatusBadge(data.status)} ${data.message || '未找到持股记录'}
-      </div>`);
-    }
-  }
-
-  // Tab switching
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      document.querySelectorAll('.panel2').forEach(p => p.classList.remove('visible'));
-      const target = document.getElementById('tab-' + tab.dataset.tab);
-      if (target) target.classList.add('visible');
-    });
-  });
-
-  // Company query (existing)
-  document.getElementById('queryBtn').addEventListener('click', () => {
-    postQuery(getPayload()).catch(error => show({ error: String(error) }));
-  });
-
-  document.getElementById('listedBtn').addEventListener('click', () => {
-    document.getElementById('personName').value = '香港中央结算有限公司';
-    document.getElementById('creditCode').value = '600519.SH';
-    document.getElementById('companyName').value = '';
-    postQuery(getPayload()).catch(error => show({ error: String(error) }));
-  });
-
-  document.getElementById('ambiguousBtn').addEventListener('click', () => {
-    document.getElementById('personName').value = '香港中央结算有限公司';
-    document.getElementById('creditCode').value = '';
-    document.getElementById('companyName').value = '平安';
-    postQuery(getPayload()).catch(error => show({ error: String(error) }));
-  });
-
-  // Person search (new)
-  document.getElementById('ps-searchBtn').addEventListener('click', () => {
-    const name = document.getElementById('ps-personName').value.trim();
-    if (!name) {
-      document.getElementById('output-person').textContent = '请输入人员姓名';
+  function openNextEmploymentTask() {
+    const next = pendingEmploymentTasks()[0];
+    if (next) {
+      openEmploymentTask(next.companyId);
       return;
     }
-    postPersonSearch(getPersonPayload()).catch(error => show('output-person', { error: String(error) }));
-  });
+    selectedEmploymentTask = null;
+    selectedEmploymentCandidate = null;
+    $('employmentEditor').classList.add('hidden');
+    $('localProfileBatchNotice').classList.remove('hidden');
+    $('localProfileBatchNotice').textContent = '当前批量任务中的单位均已处理完成，可以导出最终表格。';
+  }
 
-  // Enter key support
-  ['ps-personName', 'ps-phone', 'ps-idNumber', 'ps-company', 'ps-datasource'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('ps-searchBtn').click();
-    });
-  });
+  function taskAsCandidate(task) {
+    return {profile:{companyName:task.officialCompanyName || task.inputCompanyName,creditCode:task.creditCode,industryName:task.rawIndustryName,entityType:task.rawEntityType,registeredAddress:task.registeredAddress,source:task.source || 'LOCAL_CACHE'},employmentIndustry:task.employmentIndustry,employmentUnitNature:task.employmentUnitNature,registeredAddressAreaCode:task.registeredAddressAreaCode,registeredAddressAreaName:task.registeredAddressAreaName};
+  }
 
-  // Query records
-  document.getElementById('recordsBtn').addEventListener('click', async () => {
-    const activeTab = document.querySelector('.tab.active');
-    const outputId = activeTab && activeTab.dataset.tab === 'person' ? 'output-person' : 'output-company';
-    const el = document.getElementById(outputId);
-    el.textContent = '加载中...';
+  async function copyEmploymentCompanyName() {
+    if (!selectedEmploymentTask) return;
+    await navigator.clipboard.writeText(selectedEmploymentTask.inputCompanyName);
+    $('employmentEditorHeading').innerHTML += ' <span class="muted">（名称已复制）</span>';
+  }
+
+  async function copyEmploymentTaskName(companyId) {
+    const task = employmentCompanies.find(item => item.companyId === companyId);
+    if (!task) return;
     try {
-      const response = await fetch('/api/equity/records?size=10');
-      const data = await response.json();
-      el.textContent = JSON.stringify(data, null, 2);
-    } catch (error) {
-      el.textContent = JSON.stringify({ error: String(error) }, null, 2);
+      await navigator.clipboard.writeText(task.inputCompanyName);
+      $('employmentUploadStatus').textContent = `已复制单位名称：${task.inputCompanyName}`;
+    } catch (_) {
+      $('employmentUploadStatus').textContent = '复制失败，请检查浏览器剪贴板权限';
     }
-  });
+  }
 
-  fetch('/api/equity/provider')
-    .then(response => response.json())
-    .then(data => {
-      providerNotice.textContent = `数据源：${data.providerName}。${data.message}`;
-      providerNotice.className = data.realData ? 'notice' : 'notice';
-    })
-    .catch(error => {
-      providerNotice.textContent = `数据源状态读取失败：${String(error)}`;
-    });
+  async function parseEmploymentPage() {
+    if (!selectedEmploymentTask) return;
+    try {
+      selectedEmploymentCandidate = null;
+      $('employmentConfirmForm').classList.add('hidden');
+      const data = await requestJson(`/api/employment-jobs/${employmentJobId}/companies/${selectedEmploymentTask.companyId}/import`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pageText:$('employmentPageText').value})});
+      employmentCandidates = data.candidates || [];
+      $('employmentCandidates').innerHTML = employmentCandidates.length ? '<h3>解析候选</h3>' + employmentCandidates.map((candidate,index) => `<div class="candidate"><b>${esc(candidate.profile.companyName)}</b>　${esc(candidate.profile.creditCode)}<br><span class="muted">${esc(candidate.profile.industryName)} / ${esc(candidate.profile.entityType)} / ${esc(candidate.profile.registeredAddress)}</span><br><button class="small" onclick="selectEmploymentCandidate(${index}, true)">记录此企业并处理下一家</button></div>`).join('') : `<div class="errorbox">${esc(data.message)}</div>`;
+      if (employmentCandidates.length === 1) selectEmploymentCandidate(0, true);
+    } catch (error) { $('employmentCandidates').innerHTML = `<div class="errorbox">解析失败：${esc(error.message)}</div>`; }
+  }
+
+  function selectEmploymentCandidate(index, autoConfirm = false) {
+    selectedEmploymentCandidate = employmentCandidates[index];
+    showEmploymentConfirmForm(selectedEmploymentCandidate);
+    if (autoConfirm) collectEmploymentCompany();
+  }
+
+  function selectOptions(values, selected) {
+    return '<option value="">请选择</option>' + (values || []).map(value => `<option value="${esc(value)}" ${value === selected ? 'selected' : ''}>${esc(value)}</option>`).join('');
+  }
+
+  function showEmploymentConfirmForm(candidate) {
+    const profile = candidate.profile || {};
+    $('employmentConfirmForm').classList.remove('hidden');
+    $('employmentOfficialName').value = profile.companyName || '';
+    $('employmentCreditCode').value = profile.creditCode || '';
+    $('employmentRawIndustry').value = profile.industryName || '';
+    $('employmentRawType').value = profile.entityType || '';
+    $('employmentAddress').value = profile.registeredAddress || '';
+    $('employmentIndustry').innerHTML = selectOptions(employmentSummary.industryOptions, candidate.employmentIndustry);
+    $('employmentNature').innerHTML = selectOptions(employmentSummary.unitNatureOptions, candidate.employmentUnitNature);
+    $('employmentAreaCode').value = candidate.registeredAddressAreaCode || '';
+    $('employmentAreaName').value = candidate.registeredAddressAreaName || '';
+    $('employmentReplaceName').checked = !!selectedEmploymentTask?.replaceOfficialName;
+    renderEmploymentConflicts();
+    syncLocalProfilePanel(candidate);
+  }
+
+  function renderEmploymentConflicts() {
+    const conflicts = selectedEmploymentTask?.conflictFields || [];
+    if (!conflicts.length) { $('employmentConflicts').innerHTML = ''; return; }
+    $('employmentConflicts').innerHTML = `<div class="conflict"><b>模板已有值与查询值不一致，请逐项选择：</b>${conflicts.map(field => `<div class="grid" style="margin-top:8px"><span>${esc(fieldText[field] || field)}</span><select data-conflict-field="${esc(field)}"><option value="">请选择处理方式</option><option value="KEEP_EXISTING" ${selectedEmploymentTask.conflictDecisions?.[field] === 'KEEP_EXISTING' ? 'selected' : ''}>保留模板原值</option><option value="USE_QUERY" ${selectedEmploymentTask.conflictDecisions?.[field] === 'USE_QUERY' ? 'selected' : ''}>采用查询值</option></select></div>`).join('')}</div>`;
+  }
+
+  async function searchEmploymentAreas() {
+    clearTimeout(employmentAreaTimer);
+    employmentAreaTimer = setTimeout(async () => {
+      if (!employmentJobId) return;
+      try {
+        const options = await requestJson(`/api/employment-jobs/${employmentJobId}/areas?query=${encodeURIComponent($('employmentAreaCode').value)}`);
+        employmentAreaMap = Object.fromEntries(options.map(item => [item.code,item.name]));
+        $('employmentAreaOptions').innerHTML = options.map(item => `<option value="${esc(item.code)}">${esc(item.name)}</option>`).join('');
+        $('employmentAreaName').value = employmentAreaMap[$('employmentAreaCode').value] || '';
+        syncLocalProfilePanel();
+      } catch (_) { /* Keep manual input available. */ }
+    }, 250);
+  }
+
+  function syncLocalProfilePanel(candidate = selectedEmploymentCandidate, preferForm = false) {
+    if (!selectedEmploymentTask) return;
+    const profile = candidate?.profile || taskAsCandidate(selectedEmploymentTask).profile || {};
+    $('name').value = (preferForm ? $('employmentOfficialName').value : '') || profile.companyName || selectedEmploymentTask.inputCompanyName || '';
+    $('code').value = (preferForm ? $('employmentCreditCode').value : '') || profile.creditCode || '';
+    $('industry').value = (preferForm ? $('employmentRawIndustry').value : '') || profile.industryName || '';
+    $('entityType').value = (preferForm ? $('employmentRawType').value : '') || profile.entityType || '';
+    $('areaCode').value = (preferForm ? $('employmentAreaCode').value : '') || candidate?.registeredAddressAreaCode || '';
+    $('address').value = (preferForm ? $('employmentAddress').value : '') || profile.registeredAddress || '';
+    $('localProfileBatchNotice').classList.remove('hidden');
+    $('localProfileBatchNotice').innerHTML = `正在补全批量任务：<b>${esc(selectedEmploymentTask.inputCompanyName)}</b>。此处填写的档案信息会同步到当前单位；行业、单位性质和所在地代码请在上方批量确认区域按模板字典选择。`;
+  }
+
+  function employmentFormIsComplete() {
+    return !!selectedEmploymentTask && !!selectedEmploymentCandidate
+      && !!$('employmentOfficialName').value.trim()
+      && !!$('employmentCreditCode').value.trim()
+      && !!$('employmentIndustry').value
+      && !!$('employmentNature').value
+      && !!$('employmentAreaCode').value.trim()
+      && !Array.from(document.querySelectorAll('[data-conflict-field]')).some(select => !select.value);
+  }
+
+  async function collectEmploymentCompany() {
+    if (!selectedEmploymentTask || !selectedEmploymentCandidate) return;
+    const profile = selectedEmploymentCandidate.profile || {};
+    try {
+      await requestJson(`/api/employment-jobs/${employmentJobId}/companies/${selectedEmploymentTask.companyId}/collect`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profile,employmentIndustry:selectedEmploymentCandidate.employmentIndustry || null,employmentUnitNature:selectedEmploymentCandidate.employmentUnitNature || null,registeredAddressAreaCode:selectedEmploymentCandidate.registeredAddressAreaCode || null})});
+      employmentAdvanceAfterRefresh = true;
+      await refreshEmploymentJob();
+    } catch (error) {
+      $('employmentCandidates').innerHTML = `<div class="errorbox">记录官网信息失败：${esc(error.message)}</div>` + $('employmentCandidates').innerHTML;
+    }
+  }
+
+  async function confirmEmploymentCompany(advanceAfterSuccess = false) {
+    if (!selectedEmploymentTask || !selectedEmploymentCandidate) return;
+    const decisions = {};
+    document.querySelectorAll('[data-conflict-field]').forEach(select => { if (select.value) decisions[select.dataset.conflictField] = select.value; });
+    const sourceProfile = selectedEmploymentCandidate.profile || {};
+    const profile = {...sourceProfile,companyName:$('employmentOfficialName').value.trim(),creditCode:$('employmentCreditCode').value.trim(),industryName:$('employmentRawIndustry').value.trim() || null,entityType:$('employmentRawType').value.trim() || null,registeredAddress:$('employmentAddress').value.trim() || null};
+    try {
+      const task = await requestJson(`/api/employment-jobs/${employmentJobId}/companies/${selectedEmploymentTask.companyId}/confirm`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profile,employmentIndustry:$('employmentIndustry').value,employmentUnitNature:$('employmentNature').value,registeredAddressAreaCode:$('employmentAreaCode').value.trim(),replaceOfficialName:$('employmentReplaceName').checked,conflictDecisions:decisions})});
+      selectedEmploymentTask = task;
+      const shouldAdvance = advanceAfterSuccess && task.status === 'RESOLVED';
+      employmentAdvanceAfterRefresh = shouldAdvance;
+      await refreshEmploymentJob();
+      if (!shouldAdvance) $('employmentEditorHeading').innerHTML += task.status === 'RESOLVED' ? ' <b style="color:var(--green)">已确认并应用</b>' : ' <b style="color:var(--orange)">仍需处理冲突</b>';
+    } catch (error) { $('employmentConflicts').innerHTML = `<div class="errorbox">确认失败：${esc(error.message)}</div>` + $('employmentConflicts').innerHTML; }
+  }
+
+  async function downloadEmployment(mode) {
+    if (!employmentJobId) return;
+    try {
+      const response = await fetch(`/api/employment-jobs/${employmentJobId}/export?mode=${mode}`);
+      if (!response.ok) { const data = await response.json(); throw new Error(data.message || '导出失败'); }
+      const blob = await response.blob();
+      const disposition = response.headers.get('Content-Disposition') || '';
+      const match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+      const filename = match ? decodeURIComponent(match[1]) : `就业数据_${mode}.xlsx`;
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      await refreshEmploymentJob();
+    } catch (error) { $('employmentErrors').innerHTML = `<div class="errorbox">导出失败：${esc(error.message)}</div>`; }
+  }
+
+  async function deleteEmploymentJob() {
+    if (!employmentJobId || !confirm('确定删除当前任务、上传文件和导出文件吗？')) return;
+    try { await requestJson(`/api/employment-jobs/${employmentJobId}`, {method:'DELETE'}); employmentJobId=null; employmentSummary=null; employmentCompanies=[]; selectedEmploymentTask=null; $('employmentWorkspace').classList.add('hidden'); $('employmentEditor').classList.add('hidden'); $('employmentUploadStatus').textContent='任务已删除'; }
+    catch (error) { $('employmentErrors').innerHTML = `<div class="errorbox">删除失败：${esc(error.message)}</div>`; }
+  }
+
+  function profilesTable(list) {
+    if (!list?.length) return '';
+    return '<div class="table-wrap"><table><tr><th>名称</th><th>统一社会信用代码</th><th>行业</th><th>企业类型</th><th>注册地址行政区划代码</th></tr>' + list.map(c => `<tr><td>${esc(c.companyName)}</td><td>${esc(c.creditCode)}</td><td>${esc(c.industryName)}</td><td>${esc(c.entityType)}</td><td>${esc(c.registeredAddressAreaCode || c.areaCode)}</td></tr>`).join('') + '</table></div>';
+  }
+
+  async function lookup() { try { const data=await requestJson('/api/company/lookup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({companyName:$('name').value.trim()||null,creditCode:$('code').value.trim()||null,dataSource:'auto'})}); $('result').innerHTML=profilesTable(data.companyCandidates)||esc(data.message); $('raw').textContent=JSON.stringify(data,null,2); } catch(error){$('result').textContent=error.message;} }
+  async function previewImport() {
+    if (selectedEmploymentTask) {
+      $('employmentPageText').value = $('importText').value;
+      await parseEmploymentPage();
+      $('importStatus').textContent = '已按当前批量单位解析；请在上方核对或补全后，系统将自动处理下一家。';
+      return;
+    }
+    try { const data=await requestJson('/api/company/import/preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({companyName:$('name').value.trim()||null,pageText:$('importText').value})}); importCandidates=(data.candidates||[]).map(item=>({...item})); $('saveImportButton').disabled=!importCandidates.length; $('importStatus').textContent=data.message; $('importPreview').innerHTML=profilesTable(importCandidates); } catch(error){$('importStatus').textContent=`解析失败：${error.message}`;}
+  }
+  async function saveImport() {
+    if (selectedEmploymentTask) {
+      syncEmploymentFormFromLocalProfile();
+      await collectEmploymentCompany();
+      return;
+    }
+    try { const data=await requestJson('/api/company/import/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profiles:importCandidates})}); $('importStatus').textContent=`已保存 ${data.savedCount} 条企业档案`; } catch(error){$('importStatus').textContent=`保存失败：${error.message}`;}
+  }
+  function syncEmploymentFormFromLocalProfile() {
+    if (!selectedEmploymentTask) return;
+    selectedEmploymentCandidate = selectedEmploymentCandidate || taskAsCandidate(selectedEmploymentTask);
+    showEmploymentConfirmForm(selectedEmploymentCandidate);
+    $('employmentOfficialName').value = $('name').value.trim();
+    $('employmentCreditCode').value = $('code').value.trim();
+    $('employmentRawIndustry').value = $('industry').value.trim();
+    $('employmentRawType').value = $('entityType').value.trim();
+    $('employmentAreaCode').value = $('areaCode').value.trim();
+    $('employmentAddress').value = $('address').value.trim();
+    selectedEmploymentCandidate.profile = {
+      ...(selectedEmploymentCandidate.profile || {}),
+      companyName:$('employmentOfficialName').value.trim(),
+      creditCode:$('employmentCreditCode').value.trim() || null,
+      industryName:$('employmentRawIndustry').value.trim() || null,
+      entityType:$('employmentRawType').value.trim() || null,
+      registeredAddress:$('employmentAddress').value.trim() || null
+    };
+    selectedEmploymentCandidate.employmentIndustry = $('employmentIndustry').value || null;
+    selectedEmploymentCandidate.employmentUnitNature = $('employmentNature').value || null;
+    selectedEmploymentCandidate.registeredAddressAreaCode = $('employmentAreaCode').value.trim() || null;
+  }
+  async function saveProfile() {
+    if (selectedEmploymentTask) {
+      syncEmploymentFormFromLocalProfile();
+      if (!employmentFormIsComplete()) {
+        $('result').textContent = '已同步到当前批量单位。请在上方选择模板单位行业、单位性质和有效所在地代码后再确认。';
+        return;
+      }
+      await confirmEmploymentCompany(true);
+      return;
+    }
+    try { const data=await requestJson('/api/company/profiles',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({companyName:$('name').value.trim(),creditCode:$('code').value.trim()||null,industryName:$('industry').value.trim()||null,entityType:$('entityType').value.trim()||null,registeredAddressAreaCode:$('areaCode').value.trim()||null,areaCodeSource:'MANUAL',registeredAddress:$('address').value.trim()||null,source:'LOCAL_MANUAL'})}); $('result').textContent=`已保存：${data.companyName}`; } catch(error){$('result').textContent=error.message;}
+  }
+  async function parseCode() { try { const data=await requestJson('/api/company/credit-code/parse?creditCode='+encodeURIComponent($('code').value.trim())); $('raw').textContent=JSON.stringify(data,null,2); } catch(error){$('raw').textContent=error.message;} }
+
+  function renderBrowserTask(data) { if(data.taskId)browserTaskId=data.taskId; $('browserResult').textContent=JSON.stringify(data,null,2); $('browserStatus').textContent=`${data.status||'UNKNOWN'}：${data.message||''}`; $('saveBrowserButton').disabled=data.status!=='FOUND'||!(data.candidates||[]).length; clearTimeout(browserPollTimer); if(data.status==='CREATED'||data.status==='RUNNING')browserPollTimer=setTimeout(pollBrowserLookup,1500); }
+  async function browserCall(url,options={}) { try { const data=await requestJson(url,options); renderBrowserTask(data); return data; } catch(error){$('browserStatus').textContent=`请求失败：${error.message}`; return null;} }
+  async function startBrowserLookup() { const companyName=$('browserName').value.trim()||$('name').value.trim()||null, creditCode=$('browserCode').value.trim()||$('code').value.trim()||null; if(!companyName&&!creditCode){$('browserStatus').textContent='请输入企业名称或信用代码';return;} await browserCall('/api/company/browser/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({companyName,creditCode})}); }
+  async function continueBrowserLookup() { if(browserTaskId)await browserCall(`/api/company/browser/tasks/${browserTaskId}/continue`,{method:'POST'}); }
+  async function pollBrowserLookup() { if(browserTaskId)await browserCall(`/api/company/browser/tasks/${browserTaskId}`); }
+  async function saveBrowserCandidates() { if(!browserTaskId)return; try { const data=await requestJson(`/api/company/browser/tasks/${browserTaskId}/save`,{method:'POST'}); $('browserStatus').textContent=`已保存 ${data.savedCount} 条单位档案`; } catch(error){$('browserStatus').textContent=`保存失败：${error.message}`;} }
+
+  ['employmentOfficialName','employmentCreditCode','employmentRawIndustry','employmentRawType','employmentIndustry','employmentNature','employmentAreaCode','employmentAddress'].forEach(id => {
+    $(id).addEventListener('input', () => { syncLocalProfilePanel(undefined, true); });
+    $(id).addEventListener('change', () => { syncLocalProfilePanel(undefined, true); });
+  });
 </script>
 </body>
 </html>
