@@ -56,8 +56,6 @@ public class LocalCompanyInfoProvider implements CompanyInfoProvider {
                 .industryName(entity.getIndustryName())
                 .industryCode(entity.getIndustryCode())
                 .entityType(entity.getEntityType())
-                .employmentIndustry(entity.getEmploymentIndustry())
-                .employmentUnitNature(entity.getEmploymentUnitNature())
                 .classificationSource(entity.getClassificationSource())
                 .classificationConfidence(entity.getClassificationConfidence())
                 .registrationAuthority(entity.getRegistrationAuthority())

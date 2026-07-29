@@ -157,8 +157,6 @@ public class DefaultCompanyProfileCacheService implements CompanyProfileCacheSer
         setIfText(profile.getIndustryName(), entity::setIndustryName);
         setIfText(profile.getIndustryCode(), entity::setIndustryCode);
         setIfText(profile.getEntityType(), entity::setEntityType);
-        setIfText(profile.getEmploymentIndustry(), entity::setEmploymentIndustry);
-        setIfText(profile.getEmploymentUnitNature(), entity::setEmploymentUnitNature);
         setIfText(profile.getClassificationSource(), entity::setClassificationSource);
         setIfText(profile.getClassificationConfidence(), entity::setClassificationConfidence);
         setIfText(profile.getRegistrationAuthority(), entity::setRegistrationAuthority);
@@ -218,8 +216,6 @@ public class DefaultCompanyProfileCacheService implements CompanyProfileCacheSer
                 .industryName(entity.getIndustryName())
                 .industryCode(entity.getIndustryCode())
                 .entityType(entity.getEntityType())
-                .employmentIndustry(entity.getEmploymentIndustry())
-                .employmentUnitNature(entity.getEmploymentUnitNature())
                 .classificationSource(entity.getClassificationSource())
                 .classificationConfidence(entity.getClassificationConfidence())
                 .registrationAuthority(entity.getRegistrationAuthority())

@@ -34,9 +34,3 @@ company-browser:
   max-task-seconds: 180
   user-data-dir: .browser-data/company-profile
   screenshot-dir: .screenshots/company-profile
-
-employment-jobs:
-  storage-dir: data/employment-jobs
-  retention-days: 30
-  max-file-size-bytes: 20971520
-  max-employment-rows: 10000

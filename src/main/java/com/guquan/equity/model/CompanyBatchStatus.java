@@ -1,8 +1,8 @@
 package com.guquan.equity.model;
 
-public enum EmploymentCompanyStatus {
+public enum CompanyBatchStatus {
     NEEDS_COLLECTION,
     NEEDS_REVIEW,
-    CONFLICT,
-    RESOLVED
+    RESOLVED,
+    CONFLICT
 }

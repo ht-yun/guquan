@@ -173,8 +173,6 @@ public class DefaultCompanyLookupService implements CompanyLookupService {
                 .industryName(firstText(first.getIndustryName(), second.getIndustryName()))
                 .industryCode(firstText(first.getIndustryCode(), second.getIndustryCode()))
                 .entityType(firstText(first.getEntityType(), second.getEntityType()))
-                .employmentIndustry(firstText(first.getEmploymentIndustry(), second.getEmploymentIndustry()))
-                .employmentUnitNature(firstText(first.getEmploymentUnitNature(), second.getEmploymentUnitNature()))
                 .classificationSource(firstText(first.getClassificationSource(), second.getClassificationSource()))
                 .classificationConfidence(firstText(first.getClassificationConfidence(), second.getClassificationConfidence()))
                 .registrationAuthority(firstText(first.getRegistrationAuthority(), second.getRegistrationAuthority()))

@@ -3,7 +3,6 @@ package com.guquan.equity.model;
 import lombok.Data;
 
 @Data
-public class EmploymentImportRequest {
-
+public class CompanyBatchImportRequest {
     private String pageText;
 }

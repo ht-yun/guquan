@@ -26,10 +26,6 @@ public class CompanyProfile {
 
     private String entityType;
 
-    private String employmentIndustry;
-
-    private String employmentUnitNature;
-
     private String classificationSource;
 
     private String classificationConfidence;

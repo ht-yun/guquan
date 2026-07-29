@@ -45,12 +45,6 @@ public class CompanyProfileCacheEntity {
     @Column(length = 255)
     private String entityType;
 
-    @Column(length = 100)
-    private String employmentIndustry;
-
-    @Column(length = 100)
-    private String employmentUnitNature;
-
     @Column(length = 50)
     private String classificationSource;
 
