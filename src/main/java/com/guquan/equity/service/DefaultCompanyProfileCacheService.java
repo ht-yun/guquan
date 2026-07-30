@@ -126,15 +126,34 @@ public class DefaultCompanyProfileCacheService implements CompanyProfileCacheSer
         if (profile == null || !StringUtils.hasText(profile.getCompanyName())) {
             throw new IllegalArgumentException("公司/单位名称不能为空");
         }
-        if (profile.getCompanyName().trim().length() > 255) {
-            throw new IllegalArgumentException("公司/单位名称不能超过 255 个字符");
-        }
+        validateLength("公司/单位名称", profile.getCompanyName(), 255);
         if (StringUtils.hasText(profile.getCreditCode())
                 && !UnifiedSocialCreditCodeUtil.parse(profile.getCreditCode()).isValid()) {
             throw new IllegalArgumentException("统一社会信用代码校验不通过");
         }
+        validateLength("法定代表人", profile.getLegalPerson(), 100);
+        validateLength("经营状态", profile.getRegistrationStatus(), 50);
+        validateLength("行业", profile.getIndustryName(), 1000);
+        validateLength("行业代码", profile.getIndustryCode(), 50);
+        validateLength("企业类型", profile.getEntityType(), 255);
+        validateLength("分类来源", profile.getClassificationSource(), 50);
+        validateLength("分类置信度", profile.getClassificationConfidence(), 20);
+        validateLength("登记机关", profile.getRegistrationAuthority(), 255);
+        validateLength("登记机关代码", profile.getRegistrationAuthorityCode(), 12);
+        validateLength("省", profile.getProvince(), 50);
+        validateLength("市", profile.getCity(), 50);
+        validateLength("区县", profile.getDistrict(), 50);
+        validateLength("注册地址", profile.getRegisteredAddress(), 500);
+        validateLength("数据来源", profile.getSource(), 100);
         validateAreaCode(profile.getRegisteredAddressAreaCode());
         validateAreaCode(profile.getAreaCode());
+    }
+
+    private void validateLength(String field, String value, int maxLength) {
+        if (StringUtils.hasText(value) && value.trim().length() > maxLength) {
+            throw new IllegalArgumentException(field + "内容异常，超过 " + maxLength
+                    + " 个字符；请检查官网原文是否发生字段错位");
+        }
     }
 
     private void validateAreaCode(String code) {

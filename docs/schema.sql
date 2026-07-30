@@ -64,6 +64,20 @@ CREATE TABLE company_batch_company (
   registered_address VARCHAR(500),
   registered_address_area_code VARCHAR(12),
   source VARCHAR(100),
+  collection_message VARCHAR(1000),
   updated_at DATETIME NOT NULL,
   UNIQUE KEY uk_company_batch_name (job_id, normalized_company_name)
+);
+
+CREATE TABLE company_batch_section (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  job_id VARCHAR(40) NOT NULL,
+  company_id BIGINT NOT NULL,
+  section VARCHAR(30) NOT NULL,
+  status VARCHAR(30) NOT NULL,
+  raw_text CLOB,
+  source_url VARCHAR(1000),
+  parsed_json CLOB,
+  updated_at DATETIME NOT NULL,
+  UNIQUE KEY uk_company_batch_section (job_id, company_id, section)
 );

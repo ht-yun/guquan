@@ -31,6 +31,7 @@ company-browser:
   enabled: true
   headless: false
   timeout-millis: 15000
-  max-task-seconds: 180
+  max-task-seconds: 1800
+  max-pages-per-section: 50
   user-data-dir: .browser-data/company-profile
   screenshot-dir: .screenshots/company-profile

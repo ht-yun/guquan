@@ -4,6 +4,7 @@ import com.guquan.equity.api.CompanyBrowserLookupService;
 import com.guquan.equity.api.CompanyProfileCacheService;
 import com.guquan.equity.model.CompanyBrowserTask;
 import com.guquan.equity.model.CompanyBrowserTaskRequest;
+import com.guquan.equity.model.CompanyBrowserCandidateSelectionRequest;
 import java.util.Map;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,6 +51,16 @@ public class CompanyBrowserLookupController {
     public CompanyBrowserTask continueTask(@PathVariable String taskId) {
         try {
             return service.continueTask(taskId);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        }
+    }
+
+    @PostMapping("/tasks/{taskId}/select")
+    public CompanyBrowserTask selectCandidate(@PathVariable String taskId,
+            @RequestBody CompanyBrowserCandidateSelectionRequest request) {
+        try {
+            return service.selectCandidate(taskId, request == null ? null : request.getCreditCode());
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
         }

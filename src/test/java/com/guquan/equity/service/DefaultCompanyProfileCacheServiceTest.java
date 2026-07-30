@@ -1,6 +1,7 @@
 package com.guquan.equity.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -71,5 +72,19 @@ class DefaultCompanyProfileCacheServiceTest {
                 .get()
                 .extracting(CompanyProfile::getCompanyName)
                 .isEqualTo("深圳示例科技有限公司");
+    }
+
+    @Test
+    void reportsFriendlyFieldErrorBeforeDatabaseLengthFailure() {
+        DefaultCompanyProfileCacheService service = new DefaultCompanyProfileCacheService(
+                mock(CompanyProfileCacheRepository.class), mock(CompanyProfileAliasRepository.class));
+
+        assertThatThrownBy(() -> service.save(CompanyProfile.builder()
+                .companyName("北京示例科技有限公司")
+                .legalPerson("张".repeat(101))
+                .build()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("法定代表人")
+                .hasMessageContaining("字段错位");
     }
 }

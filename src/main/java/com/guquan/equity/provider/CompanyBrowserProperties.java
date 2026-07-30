@@ -11,7 +11,8 @@ public class CompanyBrowserProperties {
     private boolean enabled = true;
     private boolean headless = false;
     private int timeoutMillis = 15000;
-    private int maxTaskSeconds = 180;
+    private int maxTaskSeconds = 1800;
+    private int maxPagesPerSection = 50;
     private Path userDataDir = Path.of(".browser-data/company-profile");
     private Path screenshotDir = Path.of(".screenshots/company-profile");
 }

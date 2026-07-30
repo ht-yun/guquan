@@ -1,7 +1,12 @@
 target/
 .browser-data/
+.screenshots/
 .runtime/
 data/
+distribution/
+outputs/
+release/
+/中国企业信息查询项目进度汇报_*.docx
 .idea/
 *.iml
 *.log

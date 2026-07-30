@@ -38,6 +38,9 @@ public class CompanyBatchSectionEntity {
     @Column(columnDefinition = "CLOB")
     private String rawText;
 
+    @Column(length = 1000)
+    private String sourceUrl;
+
     @Column(columnDefinition = "CLOB")
     private String parsedJson;
 

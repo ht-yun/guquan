@@ -13,5 +13,6 @@ public class CompanyBatchCompanyView {
     private CompanyBatchStatus status;
     private boolean cacheHit;
     private CompanyProfile profile;
+    private String collectionMessage;
     private LocalDateTime updatedAt;
 }

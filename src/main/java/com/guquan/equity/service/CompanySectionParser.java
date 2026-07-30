@@ -18,16 +18,21 @@ public class CompanySectionParser {
             "(?:\\u6682\\u65e0|\\u65e0|\\u672a\\u67e5\\u5230|\\u672a\\u53d1\\u73b0|\\u6ca1\\u6709).{0,16}(?:\\u76f8\\u5173)?(?:\\u8bb0\\u5f55|\\u4fe1\\u606f|\\u6570\\u636e)|"
                     + "(?:\\u672a\\u5217\\u5165|\\u65e0\\u5bf9\\u5916\\u6295\\u8d44)");
     private static final Pattern CREDIT_CODE = Pattern.compile("(?<![0-9A-Z])[0-9A-Z]{18}(?![0-9A-Z])");
+    private static final Pattern POSITION_TOTAL = Pattern.compile("共计\\s*(\\d+)\\s*条信息");
 
     public ParsedSection parse(CompanyInfoSection section, String rawText) {
         if (!StringUtils.hasText(rawText)) throw new IllegalArgumentException("请粘贴官网企业信息全文");
         String text = clean(rawText);
-        if (section != CompanyInfoSection.BASIC && NO_RECORD.matcher(text).find()) {
-            return new ParsedSection("NO_RECORD", List.of());
-        }
         if (section == CompanyInfoSection.BASIC) return parseBasic(text);
         List<Map<String, String>> records = parseTable(section, text);
         if (!records.isEmpty()) return new ParsedSection("PARSED", records);
+        if (section == CompanyInfoSection.POSITIONS) {
+            records = parsePositionCards(text);
+            if (!records.isEmpty()) return new ParsedSection("PARSED", records);
+        }
+        if (NO_RECORD.matcher(text).find()) {
+            return new ParsedSection("NO_RECORD", List.of());
+        }
         Map<String, String> fallback = new LinkedHashMap<>();
         fallback.put("rawText", text);
         return new ParsedSection("PARTIAL", List.of(fallback));
@@ -69,7 +74,7 @@ public class CompanySectionParser {
         List<Map<String, String>> result = new ArrayList<>();
         for (int i = headerIndex + 1; i < lines.size(); i++) {
             List<String> values = splitCells(lines.get(i));
-            if (values.size() < 2 || values.stream().allMatch(this::looksLikeHeader)) continue;
+            if (values.size() < 2 || isHeaderRow(values, headers)) continue;
             Map<String, String> row = new LinkedHashMap<>();
             for (int c = 0; c < headers.size(); c++) row.put(headers.get(c), c < values.size() ? values.get(c) : "");
             result.add(row);
@@ -93,6 +98,45 @@ public class CompanySectionParser {
             Map<String, String> row = new LinkedHashMap<>();
             for (int i = 0; i < headers.size(); i++) row.put(headers.get(i), values.get(offset + i));
             result.add(row);
+        }
+        return result;
+    }
+
+    /**
+     * The GSXT "主要人员" module is frequently copied as a list of name cards,
+     * not a table. Some provincial pages also interleave base64-looking text
+     * into the visible name. Retain only the visible Chinese characters and
+     * never manufacture a missing position/title.
+     */
+    private List<Map<String, String>> parsePositionCards(String text) {
+        List<String> lines = lines(text);
+        for (int index = 0; index < lines.size(); index++) {
+            Matcher total = POSITION_TOTAL.matcher(lines.get(index));
+            if (!total.find()) continue;
+            int expected = Integer.parseInt(total.group(1));
+            List<Map<String, String>> result = new ArrayList<>();
+            Set<String> seen = new LinkedHashSet<>();
+            for (int cursor = index + 1; cursor < lines.size() && result.size() < expected; cursor++) {
+                String line = lines.get(cursor);
+                if (isHeading(line) || isNoise(line)) continue;
+                String name = cleanPersonName(line);
+                if (!StringUtils.hasText(name) || name.length() > 20 || !seen.add(name)) continue;
+                result.add(Map.of("姓名", name));
+            }
+            if (!result.isEmpty()) return result;
+        }
+        return List.of();
+    }
+
+    private String cleanPersonName(String value) {
+        String result = value.replaceAll("[A-Za-z0-9+/=]+", "")
+                .replaceAll("[^\\p{IsHan}·]", "");
+        for (int length = 1; length * 2 <= result.length(); length++) {
+            String prefix = result.substring(0, length);
+            if (result.startsWith(prefix + prefix)) {
+                result = prefix + result.substring(length * 2);
+                break;
+            }
         }
         return result;
     }
@@ -144,9 +188,20 @@ public class CompanySectionParser {
         String normalized = stripPunctuation(value);
         return headers.stream().anyMatch(header -> normalized.equals(header) || normalized.contains(header));
     }
-    private boolean looksLikeHeader(String value) { return value.length() <= 30 && (value.endsWith("信息") || value.endsWith("名称") || value.endsWith("状态") || value.endsWith("日期") || value.endsWith("机关") || value.endsWith("原因") || value.equals("股东") || value.equals("姓名") || value.equals("职务")); }
-    private boolean isHeading(String value) { String compact = stripPunctuation(value); return compact.matches(".*(企业基本信息|登记信息|股东及出资|股东信息|对外投资|主要人员|任职信息|经营异常|严重违法失信).*") && compact.length() < 45; }
-    private boolean isNoise(String value) { return value.matches("^(序号|查看|详情|展开|收起|共\\d+条).*$"); }
+    private boolean isHeaderRow(List<String> values, List<String> headers) {
+        if (values.stream().allMatch(this::looksLikeHeader)) return true;
+        Set<String> known = new LinkedHashSet<>(headers);
+        long matches = values.stream().filter(value -> isKnownHeader(value, known)).count();
+        return matches >= Math.max(2, (int) Math.ceil(values.size() * 0.6));
+    }
+    private boolean looksLikeHeader(String value) { return value.length() <= 30 && (value.endsWith("信息") || value.endsWith("名称") || value.endsWith("状态") || value.endsWith("日期") || value.endsWith("机关") || value.endsWith("原因") || value.contains("出资方式") || value.contains("出资金额") || value.contains("出资额") || value.contains("出资日期") || value.equals("公示日期") || value.equals("股东") || value.equals("姓名") || value.equals("职务")); }
+    private boolean isHeading(String value) {
+        String compact = stripPunctuation(value);
+        return compact.matches("^(企业基本信息|登记信息|基本信息|股东及出资信息?|股东信息|"
+                + "对外投资信息?|主要人员信息?|主要成员|任职信息|经营异常名录信息?|经营异常信息|"
+                + "严重违法失信名单信息?|严重违法失信信息)$");
+    }
+    private boolean isNoise(String value) { return value.matches("^(序号|查看|详情|展开|收起|共\\d+条|共计\\s*\\d+条|首页上一页.*).*$"); }
     private String stripPunctuation(String value) { return value.replaceAll("[\\s:：|｜（）()]+", "").trim(); }
     private String clean(String value) { return value.replace('\u00a0', ' ').replaceAll("[\\u200B-\\u200D\\uFEFF]", "").trim(); }
     private void put(Map<String, String> target, String key, String value) { if (StringUtils.hasText(value)) target.put(key, value.trim()); }

@@ -65,6 +65,9 @@ public class CompanyBatchCompanyEntity {
     @Column(length = 100)
     private String source;
 
+    @Column(length = 1000)
+    private String collectionMessage;
+
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 }

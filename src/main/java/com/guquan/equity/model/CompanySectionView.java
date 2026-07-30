@@ -12,6 +12,7 @@ public class CompanySectionView {
     private CompanyInfoSection section;
     private String status;
     private String rawText;
+    private String sourceUrl;
     private List<Map<String, String>> records;
     private LocalDateTime updatedAt;
 }

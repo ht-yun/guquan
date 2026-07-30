@@ -11,5 +11,7 @@ public interface CompanyBrowserLookupService {
 
     CompanyBrowserTask continueTask(String taskId);
 
+    CompanyBrowserTask selectCandidate(String taskId, String creditCode);
+
     void close(String taskId);
 }

@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "企业信息自动采集助手",
+  "version": "0.1.5",
+  "description": "在用户完成国家企业信用信息公示系统验证后，将企业公开信息采集到本地项目。",
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8080/*",
+    "https://www.gsxt.gov.cn/*",
+    "https://*.gsxt.gov.cn/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "企业信息自动采集助手",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.gsxt.gov.cn/*",
+        "https://*.gsxt.gov.cn/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
